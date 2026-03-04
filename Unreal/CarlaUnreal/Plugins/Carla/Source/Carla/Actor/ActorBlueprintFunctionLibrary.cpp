@@ -1494,6 +1494,10 @@ void UActorBlueprintFunctionLibrary::SetIMU(
                                          RetrieveActorAttributeToFloat("noise_accel_stddev_y", Description.Variations, 0.0f),
                                          RetrieveActorAttributeToFloat("noise_accel_stddev_z", Description.Variations, 0.0f)});
 
+  IMU->SetAccelerometerBias({RetrieveActorAttributeToFloat("noise_accel_bias_x", Description.Variations, 0.0f),
+                             RetrieveActorAttributeToFloat("noise_accel_bias_y", Description.Variations, 0.0f),
+                             RetrieveActorAttributeToFloat("noise_accel_bias_z", Description.Variations, 0.0f)});
+
   IMU->SetGyroscopeStandardDeviation({RetrieveActorAttributeToFloat("noise_gyro_stddev_x", Description.Variations, 0.0f),
                                       RetrieveActorAttributeToFloat("noise_gyro_stddev_y", Description.Variations, 0.0f),
                                       RetrieveActorAttributeToFloat("noise_gyro_stddev_z", Description.Variations, 0.0f)});

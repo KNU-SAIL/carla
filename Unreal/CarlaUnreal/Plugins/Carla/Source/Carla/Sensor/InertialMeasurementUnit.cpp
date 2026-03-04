@@ -78,9 +78,9 @@ const carla::geom::Vector3D AInertialMeasurementUnit::ComputeAccelerometerNoise(
   constexpr float Mean = 0.0f;
   return carla::geom::Vector3D
   {
-      (float)(Accelerometer.X + RandomEngine->GetNormalDistribution(Mean, StdDevAccel.X)),
-      (float)(Accelerometer.Y + RandomEngine->GetNormalDistribution(Mean, StdDevAccel.Y)),
-      (float)(Accelerometer.Z + RandomEngine->GetNormalDistribution(Mean, StdDevAccel.Z))
+      (float)(Accelerometer.X + BiasAccel.X + RandomEngine->GetNormalDistribution(Mean, StdDevAccel.X)),
+      (float)(Accelerometer.Y + BiasAccel.Y + RandomEngine->GetNormalDistribution(Mean, StdDevAccel.Y)),
+      (float)(Accelerometer.Z + BiasAccel.Z + RandomEngine->GetNormalDistribution(Mean, StdDevAccel.Z))
   };
 }
 
@@ -233,6 +233,11 @@ void AInertialMeasurementUnit::SetGyroscopeBias(const FVector &Vec)
   BiasGyro = Vec;
 }
 
+void AInertialMeasurementUnit::SetAccelerometerBias(const FVector &Vec)
+{
+  BiasAccel = Vec;
+}
+
 const FVector &AInertialMeasurementUnit::GetAccelerationStandardDeviation() const
 {
   return StdDevAccel;
@@ -246,6 +251,11 @@ const FVector &AInertialMeasurementUnit::GetGyroscopeStandardDeviation() const
 const FVector &AInertialMeasurementUnit::GetGyroscopeBias() const
 {
   return BiasGyro;
+}
+
+const FVector &AInertialMeasurementUnit::GetAccelerometerBias() const
+{
+  return BiasAccel;
 }
 
 const carla::geom::Vector3D& AInertialMeasurementUnit::GetAccelerometerValue() const

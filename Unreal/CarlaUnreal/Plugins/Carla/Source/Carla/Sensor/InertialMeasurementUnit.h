@@ -57,11 +57,15 @@ public:
 
   void SetGyroscopeBias(const FVector &Vec);
 
+  void SetAccelerometerBias(const FVector &Vec);
+
   const FVector &GetAccelerationStandardDeviation() const;
 
   const FVector &GetGyroscopeStandardDeviation() const;
 
   const FVector &GetGyroscopeBias() const;
+
+  const FVector &GetAccelerometerBias() const;
 
   const carla::geom::Vector3D& GetAccelerometerValue() const;
 
@@ -84,6 +88,9 @@ private:
 
   /// Bias for gyroscope settings.
   FVector BiasGyro;
+
+  /// Bias for accelerometer settings.
+  FVector BiasAccel;
 
   /// Used to compute the acceleration
   std::array<FVector, 2> PrevLocation;
