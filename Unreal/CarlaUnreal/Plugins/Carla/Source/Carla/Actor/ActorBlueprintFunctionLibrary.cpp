@@ -565,6 +565,26 @@ void UActorBlueprintFunctionLibrary::MakeIMUDefinition(
   StdDevGyroZ.RecommendedValues = {TEXT("0.0")};
   StdDevGyroZ.bRestrictToRecommended = false;
 
+  // - Accelerometer Bias ------------------------
+  // X Component
+  FActorVariation BiasAccelX;
+  BiasAccelX.Id = TEXT("noise_accel_bias_x");
+  BiasAccelX.Type = EActorAttributeType::Float;
+  BiasAccelX.RecommendedValues = {TEXT("0.0")};
+  BiasAccelX.bRestrictToRecommended = false;
+  // Y Component
+  FActorVariation BiasAccelY;
+  BiasAccelY.Id = TEXT("noise_accel_bias_y");
+  BiasAccelY.Type = EActorAttributeType::Float;
+  BiasAccelY.RecommendedValues = {TEXT("0.0")};
+  BiasAccelY.bRestrictToRecommended = false;
+  // Z Component
+  FActorVariation BiasAccelZ;
+  BiasAccelZ.Id = TEXT("noise_accel_bias_z");
+  BiasAccelZ.Type = EActorAttributeType::Float;
+  BiasAccelZ.RecommendedValues = {TEXT("0.0")};
+  BiasAccelZ.bRestrictToRecommended = false;
+
   // - Gyroscope Bias ----------------------------
   // X Component
   FActorVariation BiasGyroX;
@@ -585,16 +605,60 @@ void UActorBlueprintFunctionLibrary::MakeIMUDefinition(
   BiasGyroZ.RecommendedValues = {TEXT("0.0")};
   BiasGyroZ.bRestrictToRecommended = false;
 
+  // - Advanced Inertial Model -------------------
+  // Enables the Earth-aware IMU model (WGS-84 gravity, Coriolis, etc.)
+  FActorVariation EnableAdvanced;
+  EnableAdvanced.Id = TEXT("enable_advanced_inertial_model");
+  EnableAdvanced.Type = EActorAttributeType::Bool;
+  EnableAdvanced.RecommendedValues = {TEXT("false")};
+  EnableAdvanced.bRestrictToRecommended = false;
+
+  // Geodetic reference center latitude [deg]
+  FActorVariation CenterLat;
+  CenterLat.Id = TEXT("center_lat_deg");
+  CenterLat.Type = EActorAttributeType::Float;
+  CenterLat.RecommendedValues = {TEXT("36.372")};
+  CenterLat.bRestrictToRecommended = false;
+
+  // Geodetic reference center longitude [deg]
+  FActorVariation CenterLon;
+  CenterLon.Id = TEXT("center_lon_deg");
+  CenterLon.Type = EActorAttributeType::Float;
+  CenterLon.RecommendedValues = {TEXT("127.363")};
+  CenterLon.bRestrictToRecommended = false;
+
+  // Geodetic reference center altitude [m]
+  FActorVariation CenterAlt;
+  CenterAlt.Id = TEXT("center_alt_m");
+  CenterAlt.Type = EActorAttributeType::Float;
+  CenterAlt.RecommendedValues = {TEXT("70.0")};
+  CenterAlt.bRestrictToRecommended = false;
+
+  // Debug log toggle for advanced inertial outputs
+  FActorVariation DebugLog;
+  DebugLog.Id = TEXT("enable_advanced_imu_debug_log");
+  DebugLog.Type = EActorAttributeType::Bool;
+  DebugLog.RecommendedValues = {TEXT("false")};
+  DebugLog.bRestrictToRecommended = false;
+
   Definition.Variations.Append({NoiseSeed,
                                 StdDevAccelX,
                                 StdDevAccelY,
                                 StdDevAccelZ,
+                                BiasAccelX,
+                                BiasAccelY,
+                                BiasAccelZ,
                                 StdDevGyroX,
                                 StdDevGyroY,
                                 StdDevGyroZ,
                                 BiasGyroX,
                                 BiasGyroY,
-                                BiasGyroZ});
+                                BiasGyroZ,
+                                EnableAdvanced,
+                                CenterLat,
+                                CenterLon,
+                                CenterAlt,
+                                DebugLog});
 
   Success = CheckActorDefinition(Definition);
 }
@@ -1505,6 +1569,15 @@ void UActorBlueprintFunctionLibrary::SetIMU(
   IMU->SetGyroscopeBias({RetrieveActorAttributeToFloat("noise_gyro_bias_x", Description.Variations, 0.0f),
                          RetrieveActorAttributeToFloat("noise_gyro_bias_y", Description.Variations, 0.0f),
                          RetrieveActorAttributeToFloat("noise_gyro_bias_z", Description.Variations, 0.0f)});
+
+  // Advanced inertial model configuration
+  IMU->SetAdvancedInertialModelEnabled(
+      RetrieveActorAttributeToBool("enable_advanced_inertial_model", Description.Variations, false));
+
+  IMU->SetCenterLlh(
+      static_cast<double>(RetrieveActorAttributeToFloat("center_lat_deg", Description.Variations, 36.372f)),
+      static_cast<double>(RetrieveActorAttributeToFloat("center_lon_deg", Description.Variations, 127.363f)),
+      static_cast<double>(RetrieveActorAttributeToFloat("center_alt_m", Description.Variations, 70.0f)));
 }
 
 void UActorBlueprintFunctionLibrary::SetRadar(
@@ -1517,7 +1590,7 @@ void UActorBlueprintFunctionLibrary::SetRadar(
   if (Description.Variations.Contains("noise_seed"))
   {
     Radar->SetSeed(
-        RetrieveActorAttributeToInt("noise_seed", Description.Variations, 0));
+      RetrieveActorAttributeToInt("noise_seed", Description.Variations, 0));
   }
   else
   {
