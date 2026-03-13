@@ -5,14 +5,7 @@
         {
             "type": "sensor.lidar.ray_cast",
             "id": "lidar",
-            "spawn_point": {
-                "x": 0.04165,
-                "y": 0.02326,
-                "z": 2.2,
-                "roll": 0.0,
-                "pitch": 0.0,
-                "yaw": 0.0
-            },
+            "spawn_point": {"x": 0.04165, "y": 0.02326, "z": 2.2, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
             "attributes": {
                 "range": 100,
                 "channels": 32,
@@ -24,21 +17,16 @@
                 "dropoff_general_rate": 0.45,
                 "dropoff_intensity_limit": 0.8,
                 "dropoff_zero_intensity": 0.4,
+                "noise_stddev": 0.0,
                 "sensor_tick": 0.1
             }
         },
         {
             "type": "sensor.camera.rgb",
             "id": "gray_left",
-            "spawn_point": {
-                "x": 2.4,
-                "y": 0.0375,
-                "z": 0.7,
-                "roll": 0.0,
-                "pitch": 0.0,
-                "yaw": 0.0
-            },
+            "spawn_point": {"x": 2.4, "y": 0.0375, "z": 0.7, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
             "attributes": {
+                "encoding": "bgra8",
                 "image_size_x": 1280,
                 "image_size_y": 800,
                 "fov": 87.0,
@@ -48,15 +36,9 @@
         {
             "type": "sensor.camera.rgb",
             "id": "gray_right",
-            "spawn_point": {
-                "x": 2.4,
-                "y": -0.0375,
-                "z": 0.7,
-                "roll": 0.0,
-                "pitch": 0.0,
-                "yaw": 0.0
-            },
+            "spawn_point": {"x": 2.4, "y": -0.0375, "z": 0.7, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
             "attributes": {
+                "encoding": "mono8",
                 "image_size_x": 1280,
                 "image_size_y": 800,
                 "fov": 87.0,
@@ -66,24 +48,25 @@
         {
             "type": "sensor.other.imu",
             "id": "imuTrue",
-            "spawn_point": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 2.2284,
-                "roll": 0.0,
-                "pitch": 0.0,
-                "yaw": 0.0
-            },
+            "spawn_point": {"x": 0.0, "y": 0.0, "z": 2.2284, "roll": 0.0, "pitch": 0.0, "yaw": 0.0},
             "attributes": {
+                "noise_seed": 0,
                 "noise_accel_stddev_x": 0.0,
                 "noise_accel_stddev_y": 0.0,
                 "noise_accel_stddev_z": 0.0,
+                "noise_accel_bias_x": 0.0,
+                "noise_accel_bias_y": 0.0,
+                "noise_accel_bias_z": 0.0,
                 "noise_gyro_stddev_x": 0.0,
                 "noise_gyro_stddev_y": 0.0,
                 "noise_gyro_stddev_z": 0.0,
                 "noise_gyro_bias_x": 0.0,
                 "noise_gyro_bias_y": 0.0,
                 "noise_gyro_bias_z": 0.0,
+                "enable_advanced_inertial_model": false,
+                "center_lat_deg": 37,
+                "center_lon_deg": 127,
+                "center_alt_m": 10,
                 "sensor_tick": 0.005
             }
         }
