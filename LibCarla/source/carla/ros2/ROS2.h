@@ -15,6 +15,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <memory>
+#include <string>
 #include <vector>
 
 // forward declarations
@@ -89,7 +90,8 @@ class ROS2
       const carla::geom::Transform sensor_transform,
       int W, int H, float Fov,
       const carla::SharedBufferView buffer,
-      void *actor = nullptr);
+      void *actor = nullptr,
+      const std::string &encoding = "bgra8");
   void ProcessDataFromGNSS(
       uint64_t sensor_type,
       carla::streaming::detail::stream_id_type stream_id,

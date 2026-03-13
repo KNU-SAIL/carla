@@ -70,11 +70,30 @@ void ASceneCaptureCamera::PostPhysTick(UWorld *World, ELevelTick TickType, float
       return;
 
   auto FrameIndex = FCarlaEngine::GetFrameCounter();
-  ImageUtil::ReadSensorImageDataAsyncFColor(*this, [this, FrameIndex](
+  const bool bMono8 = (GetEncoding() == EEncoding::MONO8);
+  ImageUtil::ReadSensorImageDataAsyncFColor(*this, [this, FrameIndex, bMono8](
     TArrayView<const FColor> Pixels,
     FIntPoint Size) -> bool
   {
-    SendDataToClient(*this, Pixels, FrameIndex);
+    if (bMono8)
+    {
+      // BGRA -> Grayscale FColor (ITU-R BT.601): R=G=B=0.2989*R+0.587*G+0.114*B
+      // Always send FColor so native clients (PythonAPI) can deserialize as Array<Color>.
+      // ROS2 publisher extracts the mono channel before publishing.
+      TArray<FColor> GrayPixels;
+      GrayPixels.SetNumUninitialized(Pixels.Num());
+      for (int32 i = 0; i < Pixels.Num(); ++i)
+      {
+        const FColor& C = Pixels[i];
+        uint8 Gray = static_cast<uint8>(0.2989f * C.R + 0.587f * C.G + 0.114f * C.B);
+        GrayPixels[i] = FColor(Gray, Gray, Gray, 255);
+      }
+      SendDataToClient(*this, TArrayView<const FColor>(GrayPixels.GetData(), GrayPixels.Num()), FrameIndex);
+    }
+    else
+    {
+      SendDataToClient(*this, Pixels, FrameIndex);
+    }
     return true;
   });
 }

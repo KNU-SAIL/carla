@@ -214,6 +214,7 @@ protected:
         // get resolution of camera
         int W = -1, H = -1;
         float Fov = -1.0f;
+        std::string EncodingStr = "bgra8";
         auto WidthOpt = Sensor.GetAttribute("image_size_x");
         if (WidthOpt.has_value())
           W = FCString::Atoi(*WidthOpt->Value);
@@ -223,6 +224,13 @@ protected:
         auto FovOpt = Sensor.GetAttribute("fov");
         if (FovOpt.has_value())
           Fov = FCString::Atof(*FovOpt->Value);
+        auto EncodingOpt = Sensor.GetAttribute("encoding");
+        if (EncodingOpt.has_value())
+        {
+          FString EncVal = EncodingOpt->Value.ToLower();
+          if (EncVal.Equals(TEXT("mono8")))
+            EncodingStr = "mono8";
+        }
         // send data to ROS2
         auto ParentActor = Sensor.GetAttachParentActor();
         auto Transform =
@@ -236,7 +244,8 @@ protected:
           W, H,
           Fov,
           BufferView,
-          &Sensor);
+          &Sensor,
+          EncodingStr);
       });
     }
 #endif

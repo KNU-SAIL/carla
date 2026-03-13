@@ -24,6 +24,13 @@
 
 #include "SceneCaptureSensor.generated.h"
 
+UENUM(BlueprintType)
+enum class EEncoding : uint8
+{
+  BGRA8 UMETA(DisplayName = "BGRA8"),
+  MONO8 UMETA(DisplayName = "MONO8")
+};
+
 class UDrawFrustumComponent;
 class UStaticMeshComponent;
 class UTextureRenderTarget2D;
@@ -128,6 +135,17 @@ class CARLA_API ASceneCaptureSensor : public ASensor
   friend class FPixelReader2;
 
 public:
+  UFUNCTION(BlueprintCallable)
+  void SetEncoding(EEncoding InEncoding)
+  {
+    Encoding = InEncoding;
+  }
+
+  UFUNCTION(BlueprintCallable)
+  EEncoding GetEncoding() const
+  {
+    return Encoding;
+  }
   ASceneCaptureSensor(const FObjectInitializer &ObjectInitializer);
 
   void Set(const FActorDescription &ActorDescription) override;
@@ -684,6 +702,8 @@ private:
 #endif
 
 protected:
+UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Carla|Encoding")
+EEncoding Encoding = EEncoding::BGRA8;
 #ifdef CARLA_HAS_GBUFFER_API
   template <typename T>
   void SendGBufferTexturesInternal(T &Self, FGBufferRequest &GBufferData)

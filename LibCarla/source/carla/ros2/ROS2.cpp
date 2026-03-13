@@ -527,7 +527,8 @@ void ROS2::ProcessDataFromCamera(
     const carla::geom::Transform sensor_transform,
     int W, int H, float Fov,
     const carla::SharedBufferView buffer,
-    void *actor) {
+    void *actor,
+    const std::string &encoding) {
 
   switch (sensor_type) {
     case ESensors::CollisionSensor:
@@ -634,7 +635,7 @@ void ROS2::ProcessDataFromCamera(
             return;
           if (!publisher->HasBeenInitialized())
             publisher->InitInfoData(0, 0, H, W, Fov, true);
-          publisher->SetImageData(_seconds, _nanoseconds, header->height, header->width, (const uint8_t*) (buffer->data() + carla::sensor::s11n::ImageSerializer::header_offset));
+          publisher->SetImageData(_seconds, _nanoseconds, header->height, header->width, (const uint8_t*) (buffer->data() + carla::sensor::s11n::ImageSerializer::header_offset), encoding);
           publisher->SetCameraInfoData(_seconds, _nanoseconds);
           publisher->Publish();
         }

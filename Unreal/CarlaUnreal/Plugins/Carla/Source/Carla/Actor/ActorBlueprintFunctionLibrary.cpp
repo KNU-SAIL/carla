@@ -340,6 +340,13 @@ void UActorBlueprintFunctionLibrary::MakeCameraDefinition(
   ResY.RecommendedValues = {TEXT("600")};
   ResY.bRestrictToRecommended = false;
 
+  // encoding
+  FActorVariation Encoding;
+  Encoding.Id = TEXT("encoding");
+  Encoding.Type = EActorAttributeType::String;
+  Encoding.RecommendedValues = { TEXT("bgra8"), TEXT("mono8") };
+  Encoding.bRestrictToRecommended = false;
+
   // Lens parameters
   FActorVariation LensCircleFalloff;
   LensCircleFalloff.Id = TEXT("lens_circle_falloff");
@@ -380,6 +387,7 @@ void UActorBlueprintFunctionLibrary::MakeCameraDefinition(
   Definition.Variations.Append({ResX,
                                 ResY,
                                 FOV,
+                                Encoding,
                                 LensCircleFalloff,
                                 LensCircleMultiplier,
                                 LensK,
@@ -1366,6 +1374,11 @@ void UActorBlueprintFunctionLibrary::SetCamera(
       RetrieveActorAttributeToInt("image_size_y", Description.Variations, 600));
   Camera->SetFOVAngle(
       RetrieveActorAttributeToFloat("fov", Description.Variations, 90.0f));
+  {
+    const FString EncStr = RetrieveActorAttributeToString("encoding", Description.Variations, "bgra8").ToLower();
+    const EEncoding EncEnum =EncStr.Equals("mono8")? EEncoding::MONO8: EEncoding::BGRA8;
+    Camera->SetEncoding(EncEnum);
+  }
   if (Description.Variations.Contains("enable_postprocess_effects"))
   {
     Camera->EnablePostProcessingEffects(

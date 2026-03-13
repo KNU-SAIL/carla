@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "CarlaPublisher.h"
@@ -29,7 +30,7 @@ namespace ros2 {
       bool Publish();
 
       bool HasBeenInitialized() const;
-      void SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, const uint8_t* data);
+      void SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, const uint8_t* data, const std::string &encoding = "bgra8");
       void SetCameraInfoData(int32_t seconds, uint32_t nanoseconds);
       const char* type() const override { return "rgb camera"; }
 
@@ -39,7 +40,7 @@ namespace ros2 {
       bool PublishImage();
       bool PublishInfo();
 
-      void SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, std::vector<uint8_t>&& data);
+      void SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, std::vector<uint8_t>&& data, const std::string &encoding = "bgra8");
       void SetInfoRegionOfInterest(uint32_t x_offset, uint32_t y_offset, uint32_t height, uint32_t width, bool do_rectify);
 
     private:

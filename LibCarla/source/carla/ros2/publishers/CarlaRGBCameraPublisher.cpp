@@ -289,15 +289,26 @@ namespace ros2 {
     return false;
   }
 
-void CarlaRGBCameraPublisher::SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, const uint8_t* data) {
-    std::vector<uint8_t> vector_data;
-    const size_t size = height * width * 4;
-    vector_data.resize(size);
-    std::memcpy(&vector_data[0], &data[0], size);
-    SetImageData(seconds, nanoseconds, height, width, std::move(vector_data));
+void CarlaRGBCameraPublisher::SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, const uint8_t* data, const std::string &encoding) {
+    if (encoding == "mono8") {
+      // Wire format is always BGRA8 (4 bpp) with R=G=B=gray.
+      // Extract one channel to produce mono8 output for ROS2.
+      const size_t num_pixels = static_cast<size_t>(height) * width;
+      std::vector<uint8_t> vector_data(num_pixels);
+      for (size_t i = 0; i < num_pixels; ++i) {
+        vector_data[i] = data[i * 4]; // B channel (B==G==R==gray)
+      }
+      SetImageData(seconds, nanoseconds, height, width, std::move(vector_data), encoding);
+    } else {
+      const size_t size = static_cast<size_t>(height) * width * 4;
+      std::vector<uint8_t> vector_data;
+      vector_data.resize(size);
+      std::memcpy(&vector_data[0], &data[0], size);
+      SetImageData(seconds, nanoseconds, height, width, std::move(vector_data), encoding);
+    }
   }
 
-  void CarlaRGBCameraPublisher::SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, std::vector<uint8_t>&& data) {
+  void CarlaRGBCameraPublisher::SetImageData(int32_t seconds, uint32_t nanoseconds, uint32_t height, uint32_t width, std::vector<uint8_t>&& data, const std::string &encoding) {
 
     builtin_interfaces::msg::Time time;
     time.sec(seconds);
@@ -310,9 +321,10 @@ void CarlaRGBCameraPublisher::SetImageData(int32_t seconds, uint32_t nanoseconds
 
     _impl->_image.width(width);
     _impl->_image.height(height);
-    _impl->_image.encoding("bgra8");
+    _impl->_image.encoding(encoding);
     _impl->_image.is_bigendian(0);
-    _impl->_image.step(_impl->_image.width() * sizeof(uint8_t) * 4);
+    const uint32_t bpp = (encoding == "mono8") ? 1 : 4;
+    _impl->_image.step(_impl->_image.width() * sizeof(uint8_t) * bpp);
     _impl->_image.data(std::move(data));
   }
 
