@@ -140,10 +140,34 @@ carla::geom::Vector3D AInertialMeasurementUnit::ComputeAccelerometer(
   // Earth's gravitational acceleration is approximately 9.81 m/s^2
   constexpr float GRAVITY = 9.81f;
 
+  const FVector CurrentLocation = GetActorLocation();
+
+  // ---- Warmup guard (issue #8970) ----
+  // The 3-point finite-difference requires 3 consecutive VALID positions.
+  // At startup PrevLocation may still hold stale data: BeginPlay() can fire
+  // before the actor is moved to its final world position (common when the
+  // sensor is spawned with attach_to).  During warmup we continuously
+  // re-seed the history with the current real position and return a
+  // gravity-only reading to prevent million-m/s^2 spikes.
+  if (AccelWarmupTicksRemaining > 0)
+  {
+    PrevLocation[0] = CurrentLocation;
+    PrevLocation[1] = CurrentLocation;
+    PrevDeltaTime = DeltaTime;
+    --AccelWarmupTicksRemaining;
+
+    // Return gravity-only in sensor body FLU frame
+    FVector GravOnly(0.0f, 0.0f, GRAVITY);
+    FQuat ImuRotation =
+        GetRootComponent()->GetComponentTransform().GetRotation();
+    GravOnly = ImuRotation.UnrotateVector(GravOnly);
+    GravOnly.Y = -GravOnly.Y;  // FRU -> FLU
+    return ComputeAccelerometerNoise(GravOnly);
+  }
+
   // 2nd derivative of the polynomic (quadratic) interpolation
   // using the point in current time and two previous steps:
   // d2[i] = -2.0*(y1/(h1*h2)-y2/((h2+h1)*h2)-y0/(h1*(h2+h1)))
-  const FVector CurrentLocation = GetActorLocation();
 
   const FVector Y2 = PrevLocation[0];
   const FVector Y1 = PrevLocation[1];
@@ -328,6 +352,14 @@ float AInertialMeasurementUnit::GetCompassValue() const
 void AInertialMeasurementUnit::BeginPlay()
 {
   Super::BeginPlay();
+
+  // Initialize PrevLocation with the actual actor position so that the
+  // finite-difference accelerometer does not see a huge jump from the
+  // world origin (0,0,0) to the real spawn location on the first ticks.
+  // This eliminates the million-m/s² spike reported in issue #8970.
+  const FVector SpawnLocation = GetActorLocation();
+  PrevLocation[0] = SpawnLocation;
+  PrevLocation[1] = SpawnLocation;
 }
 
 // =============================================================================
@@ -390,6 +422,18 @@ FVector AInertialMeasurementUnit::GetWorldAcceleration(float DeltaTime)
   // The caller is responsible for cm→m conversion.
 
   const FVector CurrentLocation = GetActorLocation();  // [cm] world (ESU)
+
+  // Warmup guard (shared with legacy ComputeAccelerometer, issue #8970).
+  // In advanced mode this counter is decremented here instead of in
+  // ComputeAccelerometer.  During warmup, return zero world acceleration.
+  if (AccelWarmupTicksRemaining > 0)
+  {
+    PrevLocation[0] = CurrentLocation;
+    PrevLocation[1] = CurrentLocation;
+    PrevDeltaTime = DeltaTime;
+    --AccelWarmupTicksRemaining;
+    return FVector::ZeroVector;
+  }
 
   const FVector Y2 = PrevLocation[0];
   const FVector Y1 = PrevLocation[1];

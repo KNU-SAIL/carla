@@ -217,6 +217,14 @@ private:
   /// Used to compute the acceleration
   float PrevDeltaTime;
 
+  /// Warmup tick counter for the finite-difference accelerometer.
+  /// During the first ticks after spawn, PrevLocation history is unreliable
+  /// because BeginPlay may fire before the actor reaches its final world
+  /// position (e.g., when spawned with attach_to).  During warmup we
+  /// re-seed PrevLocation every tick and return gravity-only output.
+  /// See issue #8970.
+  int AccelWarmupTicksRemaining = 2;
+
   /// Accelerometer value calculated after each PostPhysTick
   carla::geom::Vector3D AccelerometerValue;
 
