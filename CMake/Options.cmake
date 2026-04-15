@@ -469,11 +469,11 @@ carla_string_option (
 carla_string_option (
   CARLA_FOONATHAN_MEMORY_VENDOR_VERSION
   "Target foonathan_memory_vendor version."
-  master
+  1.3.0
 )
 
 carla_string_option (
   CARLA_FOONATHAN_MEMORY_VENDOR_TAG
   "Target foonathan_memory_vendor git tag."
-  ${CARLA_FOONATHAN_MEMORY_VENDOR_VERSION}
+  v1.3.0
 )
